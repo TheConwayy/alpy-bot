@@ -14,7 +14,13 @@ steps:
       - '--region=us-central1'
       - '--platform=managed'
       - '--no-allow-unauthenticated'
-      - '--set-env-vars=DISCORD_TOKEN=$$DISCORD_TOKEN,SUPABASE_URL=$$SUPABASE_URL,SUPABASE_SERVICE_KEY=$$SUPABASE_SERVICE_KEY,GOOGLE_APPLICATION_CREDENTIALS=$$GOOGLE_APPLICATION_CREDENTIALS'
+      - '--port=8080'
+      - '--cpu=1'
+      - '--memory=512Mi'
+      - '--min-instances=1'
+      - '--max-instances=1'
+      - '--cpu-always-allocated'
+      - '--set-env-vars=DISCORD_TOKEN=$$DISCORD_TOKEN,SUPABASE_URL=$$SUPABASE_URL,SUPABASE_SERVICE_KEY=$$SUPABASE_SERVICE_KEY,GOOGLE_APPLICATION_CREDENTIALS=$$GOOGLE_APPLICATION_CREDENTIALS,PORT=8080'
     secretEnv: 
       - 'DISCORD_TOKEN'
       - 'SUPABASE_URL' 
@@ -32,7 +38,6 @@ availableSecrets:
     - versionName: projects/$PROJECT_ID/secrets/google-application-credentials/versions/latest
       env: 'GOOGLE_APPLICATION_CREDENTIALS'
 
-# Add logging configuration
 options:
   logging: CLOUD_LOGGING_ONLY
 
