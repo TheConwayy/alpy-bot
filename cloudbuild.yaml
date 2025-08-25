@@ -19,7 +19,7 @@ steps:
       - '--memory=512Mi'
       - '--min-instances=1'
       - '--max-instances=1'
-      - '--cpu-always-allocated'
+      - '--cpu-allocation=always'
       - '--set-env-vars=DISCORD_TOKEN=$$DISCORD_TOKEN,SUPABASE_URL=$$SUPABASE_URL,SUPABASE_SERVICE_KEY=$$SUPABASE_SERVICE_KEY,GOOGLE_APPLICATION_CREDENTIALS=$$GOOGLE_APPLICATION_CREDENTIALS,PORT=8080'
     secretEnv: 
       - 'DISCORD_TOKEN'
