@@ -2,6 +2,7 @@ import './lib/setup';
 
 import { LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
+import express from 'express'
 
 const client = new SapphireClient({
 	defaultPrefix: '!',
@@ -24,5 +25,16 @@ const main = async () => {
 		process.exit(1);
 	}
 };
+
+const app = express()
+const port = 8080
+
+app.get('/', (_req, res) => {
+	res.send('Bot is runnning!')
+})
+
+app.listen(port, () => {
+	console.log(`Health server is running on port ${port}`)
+})
 
 void main();

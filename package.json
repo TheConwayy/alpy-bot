@@ -15,12 +15,14 @@
 		"@supabase/supabase-js": "^2.56.0",
 		"colorette": "^2.0.20",
 		"discord.js": "^14.17.3",
+		"express": "^5.1.0",
 		"google-auth-library": "^7.14.1"
 	},
 	"devDependencies": {
 		"@sapphire/cli": "^1.9.3",
 		"@sapphire/prettier-config": "^2.0.0",
 		"@sapphire/ts-config": "^5.0.1",
+		"@types/express": "^5.0.3",
 		"@types/node": "^22.17.2",
 		"@types/ws": "^8.5.13",
 		"prettier": "^3.4.2",
