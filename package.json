@@ -1,8 +1,8 @@
 {
-	"name": "with-typescript-starter",
+	"name": "irs-bot",
 	"version": "1.0.0",
 	"main": "dist/index.js",
-	"author": "@sapphire",
+	"author": "Devin Conway",
 	"license": "UNLICENSE",
 	"type": "commonjs",
 	"dependencies": {
