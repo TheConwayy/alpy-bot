@@ -6,7 +6,7 @@ import { GatewayIntentBits } from 'discord.js';
 const dev = process.env.NODE_ENV === 'development';
 
 const client = new SapphireClient({
-	defaultPrefix: '!',
+	defaultPrefix: dev ? '?' : '!',
 	caseInsensitiveCommands: true,
 	logger: {
 		level: dev ? LogLevel.Debug : LogLevel.Info
