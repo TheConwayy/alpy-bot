@@ -105,7 +105,6 @@ export async function checkRoutingNumber(routingNumber: string): Promise<Routing
         }
 
         const responseData = await response.json()
-        console.log("API Response:", JSON.stringify(responseData, null, 2)); // Debug log
         
         const data = responseData as FedACHResponse
         const isValid = data && data.achParticipants && data.achParticipants.length > 0
