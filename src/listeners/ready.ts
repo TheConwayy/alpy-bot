@@ -54,7 +54,7 @@ ${line03}${dev ? ` ${pad}${blc('<')}${llc('/')}${blc('>')} ${llc('DEVELOPMENT MO
 	private sendMessage(client: Client) {
 		const channel = client.channels.cache.get('1411193505442693150');
 
-		if (!channel) return;
+		if (!channel || dev) return;
 
 		if (channel.type === ChannelType.GuildText) {
 			channel.send('Bot is online!');
