@@ -3,11 +3,13 @@ import './lib/setup';
 import { LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
 
+const dev = process.env.NODE_ENV === 'development';
+
 const client = new SapphireClient({
-	defaultPrefix: '!',
+	defaultPrefix: dev ? '?' : '!',
 	caseInsensitiveCommands: true,
 	logger: {
-		level: process.env.NODE_ENV === 'development' ? LogLevel.Debug : LogLevel.Info
+		level: dev ? LogLevel.Debug : LogLevel.Info
 	},
 	intents: [GatewayIntentBits.DirectMessages, GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent],
 	loadMessageCommandListeners: true
