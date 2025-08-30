@@ -1,6 +1,6 @@
 import { Events, Listener } from "@sapphire/framework";
 import { ContainerBuilder, Interaction, TextDisplayBuilder } from "discord.js";
-import { Emojis } from "../lib/emojis";
+import { Emojis } from "../utils/emojis";
 
 export class DeleteMessageListener extends Listener {
     public constructor(context: Listener.LoaderContext, options: Listener.Options) {

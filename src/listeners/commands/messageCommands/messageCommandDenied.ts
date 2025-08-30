@@ -1,7 +1,7 @@
 import type { Events, MessageCommandDeniedPayload } from '@sapphire/framework';
 import { Listener, type UserError } from '@sapphire/framework';
-import { MessageContainer } from '../../../lib/messageContainer';
-import { Emojis } from '../../../lib/emojis';
+import { MessageContainer } from '../../../utils/messageContainer';
+import { Emojis } from '../../../utils/emojis';
 
 export class UserEvent extends Listener<typeof Events.MessageCommandDenied> {
 	public override async run({ context, message: content }: UserError, { message }: MessageCommandDeniedPayload) {

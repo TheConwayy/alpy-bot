@@ -1,9 +1,9 @@
 import { Args, Command } from '@sapphire/framework';
 import { Message, ChannelType, ButtonStyle } from 'discord.js';
 import { checkRoutingNumber } from '../lib/routingNumber';
-import { noIndent } from '../lib/noIndent';
-import { MessageContainer } from '../lib/messageContainer';
-import { Emojis } from '../lib/emojis';
+import { noIndent } from '../utils/noIndent';
+import { MessageContainer } from '../utils/messageContainer';
+import { Emojis } from '../utils/emojis';
 
 export class RoutingCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {

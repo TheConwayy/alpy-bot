@@ -1,4 +1,4 @@
-import { Emojis } from "./emojis";
+import { Emojis } from "../utils/emojis";
 
 // Helper function to remove indentation
 export function noIndent(strings: TemplateStringsArray, ...values: any[]) {
