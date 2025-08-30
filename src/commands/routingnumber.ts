@@ -47,7 +47,7 @@ export class RoutingCommand extends Command {
 
     if (valid) {
       container.addButton({
-        customId: `delete-${message.id}`,
+        customId: `delete-response`,
         label: 'Delete Response',
         style: ButtonStyle.Danger
       })
