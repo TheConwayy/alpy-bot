@@ -4,7 +4,7 @@ import { LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
 
 const client = new SapphireClient({
-	defaultPrefix: '!',
+	defaultPrefix: process.env.NODE_ENV === 'development' ? '?' : '!',
 	caseInsensitiveCommands: true,
 	logger: {
 		level: process.env.NODE_ENV === 'development' ? LogLevel.Debug : LogLevel.Info
