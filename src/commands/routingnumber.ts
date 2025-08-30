@@ -6,58 +6,53 @@ import { MessageContainer } from '../utils/messageContainer';
 import { Emojis } from '../utils/emojis';
 
 export class RoutingCommand extends Command {
-  public constructor(context: Command.LoaderContext, options: Command.Options) {
-    super(context, {
-      ...options,
-      name: 'routingnumber',
-      description: 'Check a bank routing number',
-      aliases: ['rn', 'routing'],
-      cooldownDelay: 60_000,
-      cooldownLimit: 3,
-    });
-  }
+	public constructor(context: Command.LoaderContext, options: Command.Options) {
+		super(context, {
+			...options,
+			name: 'routingnumber',
+			description: 'Check a bank routing number',
+			aliases: ['rn', 'routing'],
+			cooldownDelay: 60_000,
+			cooldownLimit: 3
+		});
+	}
 
-  public override async messageRun(message: Message, args: Args): Promise<Message> {
-    const routingNumber = await args.pick('string');
-    
-    // Use the newer typing indicator method
-    if (message.channel.type !== ChannelType.DM && 
-        message.channel.type !== ChannelType.GroupDM) {
-      await message.channel.sendTyping();
-    }
-    
-    const result = await checkRoutingNumber(routingNumber);
-    const valid = result.valid
-    const location = `${result.city}, ${result.state} ${result.zip}` || 'N/A'
-    
-    const container = new MessageContainer()
-      .setHeading(
-        valid ? 'Valid Return' : 'Invalid Return',
-        Emojis.getStatusEmoji(valid)
-      )
-      .setBody(
-        valid ? noIndent`
+	public override async messageRun(message: Message, args: Args): Promise<Message> {
+		const routingNumber = await args.pick('string');
+
+		// Use the newer typing indicator method
+		if (message.channel.type !== ChannelType.DM && message.channel.type !== ChannelType.GroupDM) {
+			await message.channel.sendTyping();
+		}
+
+		const result = await checkRoutingNumber(routingNumber);
+		const valid = result.valid;
+		const location = `${result.city}, ${result.state} ${result.zip}` || 'N/A';
+
+		const container = new MessageContainer().setHeading(valid ? 'Valid Return' : 'Invalid Return', Emojis.getStatusEmoji(valid)).setBody(
+			valid
+				? noIndent`
         ## Returned Information:
         ) **\`Name:\`** ${result.name || 'N/A'}
-        ) **\`Location:\`** ${location}` : 
-        noIndent`
+        ) **\`Location:\`** ${location}`
+				: noIndent`
         ### Returned Information:
         ) **\`Error\`**: ${result.error || 'Not found'}`
-      )
+		);
 
-    if (valid) {
-      container.addButton({
-        customId: `delete-response`,
-        label: 'Delete Response',
-        style: ButtonStyle.Danger
-      })
-      container.addButton({
-        customId: `checkZip-${result.zip}`,
-        label: 'Check ZIP',
-        style: ButtonStyle.Primary
-      })
-    }
+		if (valid) {
+			container.addButton({
+				customId: `delete-response`,
+				label: 'Delete Response',
+				style: ButtonStyle.Danger
+			});
+			container.addButton({
+				customId: `checkZip-${result.zip}`,
+				label: 'Check ZIP',
+				style: ButtonStyle.Primary
+			});
+		}
 
-    return message.reply(container.build());
-  }
+		return message.reply(container.build());
+	}
 }

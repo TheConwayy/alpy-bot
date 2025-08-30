@@ -9,9 +9,7 @@ export class UserEvent extends Listener<typeof Events.MessageCommandDenied> {
 		// Use cases for this are for example permissions error when running the `eval` command.
 		if (Reflect.get(Object(context), 'silent')) return;
 
-		const container = new MessageContainer()
-			.setHeading('Error', Emojis.invalid)
-			.setBody(`## Error Details:\n${content}`)
+		const container = new MessageContainer().setHeading('Error', Emojis.invalid).setBody(`## Error Details:\n${content}`);
 
 		return message.reply(container.build());
 	}
