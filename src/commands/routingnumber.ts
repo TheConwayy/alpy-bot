@@ -51,6 +51,11 @@ export class RoutingCommand extends Command {
         label: 'Delete Response',
         style: ButtonStyle.Danger
       })
+      container.addButton({
+        customId: `checkZip-${result.zip}`,
+        label: 'Check ZIP',
+        style: ButtonStyle.Primary
+      })
     }
 
     return message.reply(container.build());

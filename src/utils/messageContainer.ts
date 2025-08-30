@@ -42,16 +42,20 @@ export class MessageContainer {
     }
 
     public addButton(options: {
-        customId: string;
         label: string;
+        customId?: string;
         style?: ButtonStyle
         emoji?: APIMessageComponentEmoji;
+        url?: string
         disabled?: boolean
     }): this {
         const button = new ButtonBuilder()
-            .setCustomId(options.customId)
             .setLabel(options.label)
             .setStyle(options.style || ButtonStyle.Primary)
+
+        if (options.customId) {
+            button.setCustomId(options.customId)
+        }
 
         if (options.emoji) {
             button.setEmoji(options.emoji)
@@ -59,6 +63,10 @@ export class MessageContainer {
 
         if (options.disabled) {
             button.setDisabled(true)
+        }
+
+        if (options.url && options.style === ButtonStyle.Link) {
+            button.setURL(options.url)
         }
 
         if (!this.hasInvisibleSeparator) {
