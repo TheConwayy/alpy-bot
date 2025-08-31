@@ -9,7 +9,8 @@ export class DeleteSettingCommand extends Command {
 		super(context, {
 			...options,
 			name: 'delete-setting',
-			description: 'Delete a setting'
+			description: 'Delete a setting',
+            requiredUserPermissions: ['Administrator']
 		});
 	}
 

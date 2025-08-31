@@ -10,7 +10,8 @@ export class ViewSettingCommand extends Command {
 		super(context, {
 			...options,
 			name: 'view-settings',
-			description: 'View a setting'
+			description: 'View a setting',
+            requiredUserPermissions: ['Administrator']
 		});
 	}
 
