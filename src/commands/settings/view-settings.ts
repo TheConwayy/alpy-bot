@@ -11,7 +11,7 @@ export class ViewSettingCommand extends Command {
 			...options,
 			name: 'view-settings',
 			description: 'View a setting',
-            requiredUserPermissions: ['Administrator']
+			requiredUserPermissions: ['Administrator']
 		});
 	}
 

@@ -10,7 +10,7 @@ export class DeleteSettingCommand extends Command {
 			...options,
 			name: 'delete-setting',
 			description: 'Delete a setting',
-            requiredUserPermissions: ['Administrator']
+			requiredUserPermissions: ['Administrator']
 		});
 	}
 
