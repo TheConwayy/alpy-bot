@@ -10,7 +10,7 @@ export class TestCommand extends Command {
 		});
 	}
 
-	public override async messageRun(message: Message) {
+  public override async messageRun(message: Message) {
 		return message.reply("Wow you actually made something that works... I'm proud!");
 	}
 }
