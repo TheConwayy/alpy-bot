@@ -1,9 +1,9 @@
 import { Args, Command } from '@sapphire/framework';
 import { ButtonStyle, ChannelType, Message } from 'discord.js';
-import { Emojis } from '../utils/emojis';
-import { MessageContainer } from '../utils/messageContainer';
-import { noIndent } from '../utils/noIndent';
-import { getPostalCodeData } from '../lib/postalCode';
+import { Emojis } from '../../utils/emojis';
+import { MessageContainer } from '../../utils/messageContainer';
+import { noIndent } from '../../utils/noIndent';
+import { getPostalCodeData } from '../../lib/postalCode';
 
 export class PostalCodeCommand extends Command {
 	public constructor(context: Command.LoaderContext, options: Command.Options) {

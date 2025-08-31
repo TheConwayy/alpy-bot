@@ -3,6 +3,7 @@ import { Listener } from '@sapphire/framework';
 import type { StoreRegistryValue } from '@sapphire/pieces';
 import { blue, gray, green, magenta, magentaBright, white, yellow } from 'colorette';
 import { ChannelType, Client } from 'discord.js';
+import { getSetting } from '../lib/settings';
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -51,9 +52,10 @@ ${line03}${dev ? ` ${pad}${blc('<')}${llc('/')}${blc('>')} ${llc('DEVELOPMENT MO
 		return gray(`${last ? '└─' : '├─'} Loaded ${this.style(store.size.toString().padEnd(3, ' '))} ${store.name}.`);
 	}
 
-	private sendMessage(client: Client) {
-		const channel = client.channels.cache.get('1411193505442693150');
-
+	private async sendMessage(client: Client) {
+		const channelId = await getSetting('bot_status_channel');
+		if (!channelId) return;
+		const channel = client.channels.cache.get(channelId.value);
 		if (!channel || dev) return;
 
 		if (channel.type === ChannelType.GuildText) {
