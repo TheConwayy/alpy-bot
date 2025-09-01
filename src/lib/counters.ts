@@ -63,6 +63,7 @@ export async function incrementCounter(
     .from('counters')
     .update({ count_value: counter.count_value + 1 })
     .eq('counter_name', counterName)
+    .select()
     .single();
   if (updateError) {
     return {
@@ -112,7 +113,10 @@ export async function getCounter(counterName: string): Promise<CounterReturn> {
  * If the operation was not successful, the object will contain an error message instead.
  */
 export async function getAllCounters(): Promise<GetCountersReturn> {
-  const { data: counters, error } = await supabase.from('counters').select('*');
+  const { data: counters, error } = await supabase
+    .from('counters')
+    .select('*')
+    .order('id', { ascending: true });
   if (error) {
     return {
       success: false,

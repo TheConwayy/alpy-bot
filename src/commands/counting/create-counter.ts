@@ -31,7 +31,7 @@ export class CreateCounterCommand extends Command {
       message,
       questions,
       'Please answer the following questions:',
-      'All questions have been answered!'
+      "All questions have been answered!\nDon't forget to init the counters!"
     );
 
     if (!answers.counter_name || !answers.counter_description) {
