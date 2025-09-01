@@ -7,6 +7,7 @@ export class Emojis {
 
 	// Misc emojis
 	static readonly arrow = dev ? '<a:arrow:1411160702059679895>' : '<a:arrow:1409408504569270365>';
+	static readonly notepad = dev ? '<:notepad:1412132387252600949>' : '<:notepad:1412132442390794280>';
 
 	// Helper method for getting status emoji
 	static getStatusEmoji(isValid: boolean): string {

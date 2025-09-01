@@ -146,6 +146,11 @@ export async function editSetting(setting: string, value: string): Promise<Creat
 	}
 }
 
+/**
+ * Retrieves a specific setting from the settings table.
+ * @param setting A string containing the name of the setting to retrieve.
+ * @returns A promise that resolves to a Setting object if the setting exists, or null if not.
+ */
 export async function getSetting(setting: string): Promise<Setting | null> {
 	const { data: settings, error } = await supabase.from('settings').select('*').eq('setting', setting).single();
 	if (error) {
