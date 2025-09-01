@@ -6,52 +6,58 @@ import { MessageContainer } from '../utils/messageContainer';
 import { noIndent } from '../utils/noIndent';
 
 export class CheckZipListener extends Listener {
-	public constructor(context: Listener.LoaderContext, options: Listener.Options) {
-		super(context, {
-			...options,
-			event: Events.InteractionCreate
-		});
-	}
+  public constructor(
+    context: Listener.LoaderContext,
+    options: Listener.Options
+  ) {
+    super(context, {
+      ...options,
+      event: Events.InteractionCreate,
+    });
+  }
 
-	public async run(interaction: Interaction) {
-		if (!interaction.isButton()) return;
+  public async run(interaction: Interaction) {
+    if (!interaction.isButton()) return;
 
-		if (interaction.customId.startsWith('checkZip-')) {
-			const postalCode = interaction.customId.split('-')[1];
+    if (interaction.customId.startsWith('checkZip-')) {
+      const postalCode = interaction.customId.split('-')[1];
 
-			const result = await getPostalCodeData(postalCode);
-			const dataFound = result.valid;
-			const entry = result;
+      const result = await getPostalCodeData(postalCode);
+      const dataFound = result.valid;
+      const entry = result;
 
-			const container = new MessageContainer()
-				.setHeading(dataFound ? 'Valid Postal Code' : 'Invalid Postal Code', Emojis.getStatusEmoji(dataFound))
-				.setBody(
-					dataFound
-						? noIndent`
+      const container = new MessageContainer()
+        .setHeading(
+          dataFound ? 'Valid Postal Code' : 'Invalid Postal Code',
+          Emojis.getStatusEmoji(dataFound)
+        )
+        .setBody(
+          dataFound
+            ? noIndent`
 							## Returned Information:
 							) **\`ZIP Code:\`** ${entry.postalCode || 'N/A'} 
 							) **\`City:\`** ${entry.city || 'N/A'}, ${entry.stateAbb || 'N/A'}
 							) **\`State:\`** ${entry.state || 'N/A'}
 							) **\`County:\`** ${entry.county || 'N/A'}`
-						: noIndent`
+            : noIndent`
 							### Returned Information:
 							) **\`Error\`**: The postal code \`${postalCode}\` was not found.`
-				);
+        );
 
-			if (dataFound) {
-				container.addButton({
-					customId: 'delete-response',
-					label: 'Delete Response',
-					style: ButtonStyle.Danger
-				});
-				container.addButton({
-					label: 'Check Google Maps',
-					style: ButtonStyle.Link,
-					url: `https://www.google.com/maps/search/${entry.postalCode}`
-				});
-			}
+      if (dataFound) {
+        container.addButton({
+          customId: 'delete-response',
+          label: 'Delete Response',
+          style: ButtonStyle.Danger,
+        });
+        container.addButton({
+          label: 'Check Google Maps',
+          style: ButtonStyle.Link,
+          url: `https://www.google.com/maps/search/${entry.postalCode}`,
+        });
+      }
 
-			return interaction.message.reply(container.build());
-		} else return;
-	}
+      return interaction.message.reply(container.build());
+    } else return;
+  }
 }

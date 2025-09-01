@@ -3,32 +3,32 @@ import { SupabaseClient, createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.SUPABASE_URL as string;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY as string;
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
-	auth: {
-		autoRefreshToken: false,
-		persistSession: false
-	}
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
 });
 
 interface Counter {
-	id: number;
-	counter_name: string;
-	counter_description?: string;
-	count_value: number;
-	created_by: string;
-	created_at: string;
-	updated_at: string;
+  id: number;
+  counter_name: string;
+  counter_description?: string;
+  count_value: number;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface CounterReturn {
-	success: boolean;
-	counter?: Counter;
-	error?: string;
+  success: boolean;
+  counter?: Counter;
+  error?: string;
 }
 
 interface GetCountersReturn {
-	success: boolean;
-	counter?: Counter[];
-	error?: string;
+  success: boolean;
+  counter?: Counter[];
+  error?: string;
 }
 
 /**
@@ -39,35 +39,41 @@ interface GetCountersReturn {
  * containing the updated counter if successful.
  * @throws If the counter does not exist.
  */
-export async function incrementCounter(counterName: string): Promise<CounterReturn> {
-	const { data: counter, error } = await supabase.from('counters').select('*').eq('counter_name', counterName).single();
-	if (error) {
-		return {
-			success: false,
-			error: error.message
-		};
-	}
-	if (!counter) {
-		return {
-			success: false,
-			error: 'Counter not found'
-		};
-	}
-	const { data: updatedCounter, error: updateError } = await supabase
-		.from('counters')
-		.update({ count_value: counter.count_value + 1 })
-		.eq('counter_name', counterName)
-		.single();
-	if (updateError) {
-		return {
-			success: false,
-			error: updateError.message
-		};
-	}
-	return {
-		success: true,
-		counter: updatedCounter
-	};
+export async function incrementCounter(
+  counterName: string
+): Promise<CounterReturn> {
+  const { data: counter, error } = await supabase
+    .from('counters')
+    .select('*')
+    .eq('counter_name', counterName)
+    .single();
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+  if (!counter) {
+    return {
+      success: false,
+      error: 'Counter not found',
+    };
+  }
+  const { data: updatedCounter, error: updateError } = await supabase
+    .from('counters')
+    .update({ count_value: counter.count_value + 1 })
+    .eq('counter_name', counterName)
+    .single();
+  if (updateError) {
+    return {
+      success: false,
+      error: updateError.message,
+    };
+  }
+  return {
+    success: true,
+    counter: updatedCounter,
+  };
 }
 
 /**
@@ -77,23 +83,27 @@ export async function incrementCounter(counterName: string): Promise<CounterRetu
  * @returns The retrieved counter.
  */
 export async function getCounter(counterName: string): Promise<CounterReturn> {
-	const { data: counter, error } = await supabase.from('counters').select('*').eq('counter_name', counterName).single();
-	if (error) {
-		return {
-			success: false,
-			error: error.message
-		};
-	}
-	if (!counter) {
-		return {
-			success: false,
-			error: 'Counter not found'
-		};
-	}
-	return {
-		success: true,
-		counter
-	};
+  const { data: counter, error } = await supabase
+    .from('counters')
+    .select('*')
+    .eq('counter_name', counterName)
+    .single();
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+  if (!counter) {
+    return {
+      success: false,
+      error: 'Counter not found',
+    };
+  }
+  return {
+    success: true,
+    counter,
+  };
 }
 
 /**
@@ -102,17 +112,17 @@ export async function getCounter(counterName: string): Promise<CounterReturn> {
  * If the operation was not successful, the object will contain an error message instead.
  */
 export async function getAllCounters(): Promise<GetCountersReturn> {
-	const { data: counters, error } = await supabase.from('counters').select('*');
-	if (error) {
-		return {
-			success: false,
-			error: error.message
-		};
-	}
-	return {
-		success: true,
-		counter: counters
-	};
+  const { data: counters, error } = await supabase.from('counters').select('*');
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+  return {
+    success: true,
+    counter: counters,
+  };
 }
 
 /**
@@ -124,21 +134,30 @@ export async function getAllCounters(): Promise<GetCountersReturn> {
  * a string containing the created counter if successful, and an optional string containing an error
  * message if not.
  */
-export async function createCounter(createdById: string, counterName: string, counterDescription?: string | null): Promise<CounterReturn> {
-	const { data: counter, error } = await supabase
-		.from('counters')
-		.insert({ counter_name: counterName, counter_description: counterDescription, count_value: 0, created_by: createdById })
-		.single();
-	if (error) {
-		return {
-			success: false,
-			error: error.message
-		};
-	}
-	return {
-		success: true,
-		counter
-	};
+export async function createCounter(
+  createdById: string,
+  counterName: string,
+  counterDescription?: string | null
+): Promise<CounterReturn> {
+  const { data: counter, error } = await supabase
+    .from('counters')
+    .insert({
+      counter_name: counterName,
+      counter_description: counterDescription,
+      count_value: 0,
+      created_by: createdById,
+    })
+    .single();
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+  return {
+    success: true,
+    counter,
+  };
 }
 
 /**
@@ -147,17 +166,22 @@ export async function createCounter(createdById: string, counterName: string, co
  * @returns A promise that resolves to a CounterReturn object, which contains a boolean indicating success,
  * and an optional string containing an error message if not.
  */
-export async function deleteCounter(counterName: string): Promise<CounterReturn> {
-	const { error } = await supabase.from('counters').delete().eq('counter_name', counterName);
-	if (error) {
-		return {
-			success: false,
-			error: error.message
-		};
-	}
-	return {
-		success: true
-	};
+export async function deleteCounter(
+  counterName: string
+): Promise<CounterReturn> {
+  const { error } = await supabase
+    .from('counters')
+    .delete()
+    .eq('counter_name', counterName);
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+  return {
+    success: true,
+  };
 }
 
 /**
@@ -166,15 +190,20 @@ export async function deleteCounter(counterName: string): Promise<CounterReturn>
  * @returns A promise that resolves to a CounterReturn object, which contains a boolean indicating success and
  * an optional string containing an error message if not.
  */
-export async function resetCounter(counterName: string): Promise<CounterReturn> {
-	const { error } = await supabase.from('counters').update({ count_value: 0 }).eq('counter_name', counterName);
-	if (error) {
-		return {
-			success: false,
-			error: error.message
-		};
-	}
-	return {
-		success: true
-	};
+export async function resetCounter(
+  counterName: string
+): Promise<CounterReturn> {
+  const { error } = await supabase
+    .from('counters')
+    .update({ count_value: 0 })
+    .eq('counter_name', counterName);
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+  return {
+    success: true,
+  };
 }
