@@ -3,7 +3,11 @@ import { ChannelType, Message } from 'discord.js';
 import { getAllCounters, resetAllCounters } from '../../lib/counters';
 import { MessageContainer } from '../../utils/messageContainer';
 import { Emojis } from '../../utils/emojis';
-import { addCounterButtons, buildCounterFunction } from './init-counters';
+import {
+  addCounterButtons,
+  buildCounterFunction,
+  formatString,
+} from './init-counters';
 import { getSetting } from '../../lib/settings';
 
 export class ResetCountersCommand extends Command {
@@ -16,8 +20,9 @@ export class ResetCountersCommand extends Command {
   }
 
   public override async messageRun(message: Message) {
+    let stats = [];
+
     const counters = await getAllCounters();
-    const result = await resetAllCounters();
 
     if (!counters.success || !counters.counter) {
       const errorContainer = new MessageContainer()
@@ -25,6 +30,14 @@ export class ResetCountersCommand extends Command {
         .setBody('Error getting counters');
 
       return message.reply(errorContainer.build());
+    }
+
+    for (let i = 0; i < counters.counter.length; i++) {
+      const result = {
+        name: counters.counter[i].counter_name,
+        count: counters.counter[i].count_value,
+      };
+      stats.push(result);
     }
 
     const counterContainer = new MessageContainer()
@@ -69,6 +82,8 @@ export class ResetCountersCommand extends Command {
 
     await channel.send(counterContainer.build());
 
+    const result = await resetAllCounters();
+
     const statusContainer = new MessageContainer()
       .setHeading(
         result.success ? 'Success' : 'Error',
@@ -76,7 +91,7 @@ export class ResetCountersCommand extends Command {
       )
       .setBody(
         result.success
-          ? 'Successfully reset all counters'
+          ? `Successfully reset all counters\n## Your stats:\n${stats.map((stat) => `**${formatString(stat.name, false)}**: ${stat.count}`).join('\n')}`
           : `Failed to reset all counters.\n**\`Error:\`** ${result.error}`
       );
 
