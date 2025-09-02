@@ -13,7 +13,7 @@ import { noIndent } from '../../utils/noIndent';
  * @param notPlural If true, it will remove the last character if the string ends with 's'.
  * @returns The formatted string.
  */
-function formatString(string: string, notPlural: boolean) {
+export function formatString(string: string, notPlural: boolean) {
   let str = string
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
