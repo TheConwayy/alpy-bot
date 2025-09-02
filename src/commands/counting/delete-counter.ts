@@ -1,31 +1,31 @@
 import { Args, Command } from '@sapphire/framework';
 import { Message } from 'discord.js';
-import { editSetting } from '../../lib/settings';
 import { Emojis } from '../../utils/emojis';
 import { MessageContainer } from '../../utils/messageContainer';
+import { deleteCounter } from '../../lib/counters';
 
-export class EditSettingCommand extends Command {
-  public constructor(context: Command.LoaderContext) {
+export class DeleteCounterCommand extends Command {
+  public constructor(context: Command.LoaderContext, options: Command.Options) {
     super(context, {
-      name: 'edit-setting',
-      description: 'Edit a setting',
+      ...options,
+      name: 'delete-counter',
+      description: 'Delete a counter',
       requiredUserPermissions: ['Administrator'],
     });
   }
 
   public override async messageRun(message: Message, args: Args) {
-    const setting = await args.pick('string');
-    const value = await args.pick('string');
+    const counter = await args.pick('string').catch(() => null);
 
-    if (!setting || !value) {
+    if (!counter) {
       const errorContainer = new MessageContainer()
         .setHeading('Error', Emojis.invalid)
-        .setBody('Please provide both a setting and a value.');
+        .setBody('Please provide a counter to delete.');
 
       return message.reply(errorContainer.build());
     }
 
-    const result = await editSetting(setting, value);
+    const result = await deleteCounter(counter);
     const success = result.success;
 
     const messageContainer = new MessageContainer()
@@ -35,8 +35,8 @@ export class EditSettingCommand extends Command {
       )
       .setBody(
         success
-          ? `Successfully edited setting \`${setting}\` with value \`${value}\``
-          : `Failed to edit setting \`${setting}\`.\n**\`Error:\`** ${result.error}`
+          ? `Successfully deleted counter \`${counter}\`\nDon't forget to reset the counters!`
+          : `Failed to delete counter \`${counter}\`.\n**\`Error:\`** ${result.error}`
       );
 
     return message.reply(messageContainer.build());
