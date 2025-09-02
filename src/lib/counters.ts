@@ -211,3 +211,24 @@ export async function resetCounter(
     success: true,
   };
 }
+
+/**
+ * Resets all counters to 0 in the database.
+ * @returns A promise that resolves to a CounterReturn object, which contains a boolean indicating success and
+ * an optional string containing an error message if not.
+ */
+export async function resetAllCounters(): Promise<CounterReturn> {
+  const { error } = await supabase
+    .from('counters')
+    .update({ count_value: 0 })
+    .filter('count_value', 'gt', 0);
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+  return {
+    success: true,
+  };
+}

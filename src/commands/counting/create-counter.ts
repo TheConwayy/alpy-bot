@@ -23,6 +23,7 @@ export class CreateCounterCommand extends Command {
       ...options,
       name: 'create-counter',
       description: 'Create a new counter',
+      requiredUserPermissions: ['Administrator'],
     });
   }
 
@@ -34,9 +35,9 @@ export class CreateCounterCommand extends Command {
       "All questions have been answered!\nDon't forget to init the counters!"
     );
 
-    if (!answers.counter_name || !answers.counter_description) {
+    if (!answers.counter_name) {
       return await message.reply(
-        'Please provide a name and description for the counter.'
+        'Please ensure there is a name for the counter.'
       );
     }
 

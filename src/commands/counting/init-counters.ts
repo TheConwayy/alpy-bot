@@ -42,7 +42,7 @@ export function buildCounterFunction(counters: {
 }) {
   return counters.counter
     .map((counter) => {
-      return noIndent`) **${formatString(counter.counter_name, false)}**: \`${counter.count_value.toString()}\`${counter.counter_description ? `\n${counter.counter_description}` : ''}`;
+      return noIndent`) **${formatString(counter.counter_name, false)}**: \`${counter.count_value.toString()}\`${counter.counter_description ? `\n${counter.counter_description}` : ''}${counter.counter_description ? ' | ' : '\n'}\`${counter.counter_name}\``;
     })
     .join('\n');
 }
@@ -65,6 +65,7 @@ export class InitCountersCommand extends Command {
     super(context, {
       name: 'init-counters',
       description: 'Initialize all counters',
+      requiredUserPermissions: ['Administrator'],
     });
   }
 
