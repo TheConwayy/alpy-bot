@@ -5,6 +5,7 @@ import { Emojis } from '../../utils/emojis';
 import { MessageContainer } from '../../utils/messageContainer';
 import { getAllCounters } from '../../lib/counters';
 import { noIndent } from '../../utils/noIndent';
+import { sendTyping } from '../../utils/sendTyping';
 
 /**
  * Formats a given string to a space-separated string with title case.
@@ -70,6 +71,8 @@ export class InitCountersCommand extends Command {
   }
 
   public override async messageRun(message: Message) {
+    await sendTyping(message);
+
     const channelResult = await getSetting('counting_channel');
     if (!channelResult) {
       const errorContainer = new MessageContainer()

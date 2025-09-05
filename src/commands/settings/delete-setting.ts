@@ -3,6 +3,7 @@ import { Message } from 'discord.js';
 import { Emojis } from '../../utils/emojis';
 import { MessageContainer } from '../../utils/messageContainer';
 import { deleteSetting } from '../../lib/settings';
+import { sendTyping } from '../../utils/sendTyping';
 
 export class DeleteSettingCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -15,6 +16,8 @@ export class DeleteSettingCommand extends Command {
   }
 
   public override async messageRun(message: Message, args: Args) {
+    await sendTyping(message);
+
     const setting = await args.pick('string');
 
     if (!setting) {

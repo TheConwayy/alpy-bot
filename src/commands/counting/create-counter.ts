@@ -4,6 +4,7 @@ import { Message } from 'discord.js';
 import { createCounter } from '../../lib/counters';
 import { MessageContainer } from '../../utils/messageContainer';
 import { Emojis } from '../../utils/emojis';
+import { sendTyping } from '../../utils/sendTyping';
 
 const questions: Question[] = [
   {
@@ -28,6 +29,8 @@ export class CreateCounterCommand extends Command {
   }
 
   public override async messageRun(message: Message) {
+    await sendTyping(message);
+
     const answers = await runSurvey(
       message,
       questions,

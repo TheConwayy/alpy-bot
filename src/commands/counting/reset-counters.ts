@@ -9,6 +9,7 @@ import {
   formatString,
 } from './init-counters';
 import { getSetting } from '../../lib/settings';
+import { sendTyping } from '../../utils/sendTyping';
 
 export class ResetCountersCommand extends Command {
   public constructor(context: Command.LoaderContext) {
@@ -20,6 +21,8 @@ export class ResetCountersCommand extends Command {
   }
 
   public override async messageRun(message: Message) {
+    await sendTyping(message);
+
     const result = await resetAllCounters();
 
     if (!result.success) {
