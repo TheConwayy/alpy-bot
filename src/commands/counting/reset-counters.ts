@@ -20,7 +20,15 @@ export class ResetCountersCommand extends Command {
   }
 
   public override async messageRun(message: Message) {
-    let stats = [];
+    const result = await resetAllCounters();
+
+    if (!result.success) {
+      const errorContainer = new MessageContainer()
+        .setHeading('Error', Emojis.invalid)
+        .setBody(`Failed to reset counters.\n**\`Error:\`** ${result.error}`);
+
+      return message.reply(errorContainer.build());
+    }
 
     const counters = await getAllCounters();
 
@@ -30,14 +38,6 @@ export class ResetCountersCommand extends Command {
         .setBody('Error getting counters');
 
       return message.reply(errorContainer.build());
-    }
-
-    for (let i = 0; i < counters.counter.length; i++) {
-      const result = {
-        name: counters.counter[i].counter_name,
-        count: counters.counter[i].count_value,
-      };
-      stats.push(result);
     }
 
     const counterContainer = new MessageContainer()
@@ -82,19 +82,12 @@ export class ResetCountersCommand extends Command {
 
     await channel.send(counterContainer.build());
 
-    const result = await resetAllCounters();
-
-    const statusContainer = new MessageContainer()
-      .setHeading(
-        result.success ? 'Success' : 'Error',
-        result.success ? Emojis.valid : Emojis.invalid
-      )
+    const successContainer = new MessageContainer()
+      .setHeading('Success', Emojis.valid)
       .setBody(
-        result.success
-          ? `Successfully reset all counters\n## Your stats:\n${stats.map((stat) => `**${formatString(stat.name, false)}**: ${stat.count}`).join('\n')}`
-          : `Failed to reset all counters.\n**\`Error:\`** ${result.error}`
+        `Successfully reset all counters\n## Your stats:\n${counters.counter.map((counter) => `**${formatString(counter.counter_name, false)}**: ${counter.count_value}`).join('\n')}`
       );
 
-    return await message.reply(statusContainer.build());
+    return await message.reply(successContainer.build());
   }
 }
