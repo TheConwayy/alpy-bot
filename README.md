@@ -1,30 +1,46 @@
-# TypeScript Sapphire Bot example
+# IRS Bot
 
-This is a basic setup of a Discord bot using the [sapphire framework][sapphire] written in TypeScript
+A Discord bot built using the Sapphire framework specifally made for selling insurance
+_(ik, weird, right?)_
 
-## How to use it?
+## Features
 
-### Prerequisite
+- Counter management: Initialize, reset, and delete counters.
+- Setting management: View and edit settings.
+- Postal code information: Check information about a postal code.
+- Routing number information: Check a bank routing number.
 
-```sh
-npm install
-```
+## Commands
 
-### Development
+- `delete-counter`: Delete a counter.
+- `init-counters`: Initialize all counters.
+- `reset-counters`: Reset all counters.
+- `create-counter`: Create a new counter.
+- `edit-setting`: Edit a setting.
+- `view-settings`: View a setting.
+- `postalcode`: Check information about a postal code.
+- `routingnumber`: Check a bank routing number.
+- `ping`: Test the bot's response time.
 
-This example can be run with `tsc-watch` to watch the files and automatically restart your bot.
+## Requirements
 
-```sh
-npm run watch:start
-```
+- Node.js
+- Discord.js
+- Sapphire framework
 
-### Production
+## Installation
 
-You can also run the bot with `npm dev`, this will first build your code and then run `node ./dist/index.js`. But this is not the recommended way to run a bot in production.
+1. Clone the repository: `git clone https://github.com/TheConwayy/irs-bot.git`
+2. Install dependencies: `npm install`
+3. Configure the bot: `cp src/.env.example src/.env` and fill in the required information
+4. Build the build: `npm run build`
+5. Start the bot: `npm run start`
+6. (Optionally) Run the bot in dev mode: `npm run dev`
+
+## Contributing
+
+Contributions are welcome! Please submit a pull request with your changes.
 
 ## License
 
-Dedicated to the public domain via the [Unlicense], courtesy of the Sapphire Community and its contributors.
-
-[sapphire]: https://github.com/sapphiredev/framework
-[unlicense]: https://github.com/sapphiredev/examples/blob/main/LICENSE.md
+[GNU GPL v3](https://choosealicense.com/licenses/gpl-3.0/#)
