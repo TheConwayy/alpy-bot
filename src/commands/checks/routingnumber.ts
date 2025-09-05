@@ -1,9 +1,10 @@
 import { Args, Command } from '@sapphire/framework';
-import { Message, ChannelType, ButtonStyle } from 'discord.js';
+import { Message, ButtonStyle } from 'discord.js';
 import { checkRoutingNumber } from '../../lib/routingNumber';
 import { noIndent } from '../../utils/noIndent';
 import { MessageContainer } from '../../utils/messageContainer';
 import { Emojis } from '../../utils/emojis';
+import { sendTyping } from '../../utils/sendTyping';
 
 export class RoutingCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -23,13 +24,7 @@ export class RoutingCommand extends Command {
   ): Promise<Message> {
     const routingNumber = await args.pick('string');
 
-    // Use the newer typing indicator method
-    if (
-      message.channel.type !== ChannelType.DM &&
-      message.channel.type !== ChannelType.GroupDM
-    ) {
-      await message.channel.sendTyping();
-    }
+    await sendTyping(message);
 
     const result = await checkRoutingNumber(routingNumber);
     const valid = result.valid;

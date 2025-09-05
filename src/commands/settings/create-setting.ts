@@ -3,6 +3,7 @@ import { Message } from 'discord.js';
 import { createSetting } from '../../lib/settings';
 import { MessageContainer } from '../../utils/messageContainer';
 import { Emojis } from '../../utils/emojis';
+import { sendTyping } from '../../utils/sendTyping';
 
 export class CreateSettingCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -15,6 +16,8 @@ export class CreateSettingCommand extends Command {
   }
 
   public override async messageRun(message: Message, args: Args) {
+    await sendTyping(message);
+
     const setting = await args.pick('string');
     const value = await args.pick('string');
 

@@ -3,6 +3,7 @@ import { Message } from 'discord.js';
 import { Emojis } from '../../utils/emojis';
 import { MessageContainer } from '../../utils/messageContainer';
 import { deleteCounter } from '../../lib/counters';
+import { sendTyping } from '../../utils/sendTyping';
 
 export class DeleteCounterCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -15,6 +16,8 @@ export class DeleteCounterCommand extends Command {
   }
 
   public override async messageRun(message: Message, args: Args) {
+    await sendTyping(message);
+
     const counter = await args.pick('string').catch(() => null);
 
     if (!counter) {

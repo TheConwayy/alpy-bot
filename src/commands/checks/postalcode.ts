@@ -1,9 +1,10 @@
 import { Args, Command } from '@sapphire/framework';
-import { ButtonStyle, ChannelType, Message } from 'discord.js';
+import { ButtonStyle, Message } from 'discord.js';
 import { Emojis } from '../../utils/emojis';
 import { MessageContainer } from '../../utils/messageContainer';
 import { noIndent } from '../../utils/noIndent';
 import { getPostalCodeData } from '../../lib/postalCode';
+import { sendTyping } from '../../utils/sendTyping';
 
 export class PostalCodeCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -20,13 +21,7 @@ export class PostalCodeCommand extends Command {
   public override async messageRun(message: Message, args: Args) {
     const postalCode = await args.pick('string');
 
-    // Use the newer typing indicator method
-    if (
-      message.channel.type !== ChannelType.DM &&
-      message.channel.type !== ChannelType.GroupDM
-    ) {
-      await message.channel.sendTyping();
-    }
+    await sendTyping(message);
 
     const result = await getPostalCodeData(postalCode);
     const dataFound = result.valid;

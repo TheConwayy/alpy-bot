@@ -10,6 +10,24 @@ import {
   TextDisplayBuilder,
 } from 'discord.js';
 
+type ButtonOptions =
+  | {
+      label: string;
+      style: ButtonStyle.Link;
+      url: string;
+      customId?: never;
+      emoji?: APIMessageComponentEmoji;
+      disabled?: boolean;
+    }
+  | {
+      label: string;
+      style?: Exclude<ButtonStyle, ButtonStyle.Link>;
+      customId: string;
+      url?: never;
+      emoji?: APIMessageComponentEmoji;
+      disabled?: boolean;
+    };
+
 export class MessageContainer {
   private container: ContainerBuilder;
   private hasVisibleSeparator: boolean = false;
@@ -50,14 +68,7 @@ export class MessageContainer {
     return this;
   }
 
-  public addButton(options: {
-    label: string;
-    customId?: string;
-    style?: ButtonStyle;
-    emoji?: APIMessageComponentEmoji;
-    url?: string;
-    disabled?: boolean;
-  }): this {
+  public addButton(options: ButtonOptions): this {
     const button = new ButtonBuilder()
       .setLabel(options.label)
       .setStyle(options.style || ButtonStyle.Primary);
