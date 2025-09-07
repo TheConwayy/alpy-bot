@@ -1,7 +1,5 @@
 import { Args, Command } from '@sapphire/framework';
 import { Message } from 'discord.js';
-import { Emojis } from '../../../utils/emojis';
-import { MessageContainer } from '../../../utils/messageContainer';
 import { UniversalSettingsHandlers } from './subcommands';
 import { sendTyping } from '../../../utils/sendTyping';
 import { errorContainer } from '../../../utils/errorContainer';
