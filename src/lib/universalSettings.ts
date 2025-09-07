@@ -1,166 +1,96 @@
-import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient';
 
-const supabaseUrl = process.env.SUPABASE_URL as string;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY as string; // Add this to your .env
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
-
-export interface UniveralSetting {
+export interface UniversalSetting {
   setting: string;
   value: string;
 }
 
-type UniveralSettingReturn =
-  | {
-      success: true;
-      setting: UniveralSetting | UniveralSetting[];
-      error?: never;
-    }
-  | {
-      success: false;
-      error: string;
-      setting?: never;
-    };
+export type UniversalSettingReturn<T = UniversalSetting | UniversalSetting[]> =
+  | { success: true; setting: T }
+  | { success: false; error: string };
 
-/**
- * Retrieves a setting from the universal settings table.
- * @param setting A string containing the name of the setting to retrieve.
- * @returns A promise that resolves to a UniveralSettingReturn object, which contains a boolean indicating success,
- * the setting that was retrieved if successful, or an optional string containing an error message if not.
- */
-export async function getUniveralSetting(
+// 🔹 Helper to wrap Supabase calls
+function handleQuery<T>(result: {
+  data: T | null;
+  error: any;
+}): UniversalSettingReturn<T> {
+  const { data, error } = result;
+  if (error || !data) {
+    return { success: false, error: error?.message ?? 'No data found' };
+  }
+  return { success: true, setting: data };
+}
+
+// 🔹 Get one setting
+export async function getUniversalSetting(
   setting: string
-): Promise<UniveralSettingReturn> {
-  const { data, error } = await supabase
+): Promise<UniversalSettingReturn<UniversalSetting>> {
+  const result = await supabase
     .from('universal_settings')
     .select('*')
     .eq('setting', setting)
     .single();
-  if (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-  return {
-    success: true,
-    setting: data,
-  };
+
+  return handleQuery<UniversalSetting>(result);
 }
 
-export async function getAlluniversalSettings(): Promise<UniveralSettingReturn> {
-  const { data, error } = await supabase.from('universal_settings').select('*');
-  if (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-
-  if (data.length === 0) {
-    return {
-      success: false,
-      error: 'No settings found',
-    };
-  }
-
-  return {
-    success: true,
-    setting: data as UniveralSetting[],
-  };
+// 🔹 Get all settings
+export async function getAllUniversalSettings(): Promise<
+  UniversalSettingReturn<UniversalSetting[]>
+> {
+  const result = await supabase.from('universal_settings').select('*');
+  return handleQuery<UniversalSetting[]>(result);
 }
 
-export async function addUniveralSetting(
+// 🔹 Add a setting
+export async function addUniversalSetting(
   setting: string,
   value: string
-): Promise<UniveralSettingReturn> {
-  const { data } = await supabase
-    .from('universal_settings')
-    .select('*')
-    .eq('setting', setting)
-    .single();
-  if (data) {
-    return {
-      success: false,
-      error: 'Setting already exists',
-    };
-  } else {
-    const { data, error } = await supabase
-      .from('universal_settings')
-      .insert({ setting, value })
-      .single();
-    if (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-
-    return {
-      success: true,
-      setting: data,
-    };
+): Promise<UniversalSettingReturn<UniversalSetting>> {
+  // Check if exists
+  const exists = await getUniversalSetting(setting);
+  if (exists.success) {
+    return { success: false, error: 'Setting already exists' };
   }
+
+  const result = await supabase
+    .from('universal_settings')
+    .insert({ setting, value })
+    .select()
+    .single();
+
+  return handleQuery<UniversalSetting>(result);
 }
 
-/**
- * Edits a setting in the universal settings table.
- * @param setting A string containing the name of the setting to edit.
- * @param value A string containing the new value for the setting.
- * @returns A promise that resolves to a UniveralSettingReturn object, which contains a boolean indicating success,
- * the setting that was attempted to be edited (regardless of success), an optional string containing the new value
- * if successful, and an optional string containing an error message if not.
- */
+// 🔹 Edit a setting
 export async function editUniversalSetting(
   setting: string,
   value: string
-): Promise<UniveralSettingReturn> {
-  const { data, error } = await supabase
+): Promise<UniversalSettingReturn<UniversalSetting>> {
+  const exists = await getUniversalSetting(setting);
+  if (!exists.success) {
+    return { success: false, error: 'Setting does not exist' };
+  }
+
+  const result = await supabase
     .from('universal_settings')
     .update({ value })
     .eq('setting', setting)
+    .select()
     .single();
-  if (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
-  } else {
-    return {
-      success: true,
-      setting: data,
-    };
-  }
+
+  return handleQuery<UniversalSetting>(result);
 }
 
-/**
- * Deletes a setting from the universal settings table.
- * @param setting A string containing the name of the setting to delete.
- * @returns A promise that resolves to a UniveralSettingReturn object, which contains a boolean indicating success,
- * the setting that was attempted to be deleted (regardless of success), and an optional string containing an error
- * message if not.
- */
+// 🔹 Delete a setting
 export async function deleteUniversalSetting(
   setting: string
-): Promise<UniveralSettingReturn> {
-  const { data, error } = await supabase
+): Promise<UniversalSettingReturn<UniversalSetting>> {
+  const result = await supabase
     .from('universal_settings')
     .delete()
     .eq('setting', setting)
+    .select()
     .single();
-  if (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
-  } else {
-    return {
-      success: true,
-      setting: data,
-    };
-  }
+  return handleQuery<UniversalSetting>(result);
 }

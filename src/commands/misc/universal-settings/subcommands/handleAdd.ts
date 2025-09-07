@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { addUniveralSetting } from '../../../../lib/universalSettings';
+import { addUniversalSetting } from '../../../../lib/universalSettings';
 import { Emojis } from '../../../../utils/emojis';
 import { MessageContainer } from '../../../../utils/messageContainer';
 import { errorContainer } from '../../../../utils/errorContainer';
@@ -9,7 +9,7 @@ export async function handleAdd(
   setting: string,
   value: string
 ) {
-  const data = await addUniveralSetting(setting, value);
+  const data = await addUniversalSetting(setting, value);
   if (!data.success) {
     return errorContainer(
       message,

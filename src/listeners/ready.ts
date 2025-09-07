@@ -11,7 +11,7 @@ import {
   yellow,
 } from 'colorette';
 import { ChannelType, Client } from 'discord.js';
-import { getUniveralSetting, UniveralSetting } from '../lib/universalSettings';
+import { getUniversalSetting } from '../lib/universalSettings';
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -63,11 +63,9 @@ ${line03}${dev ? ` ${pad}${blc('<')}${llc('/')}${blc('>')} ${llc('DEVELOPMENT MO
   }
 
   private async sendMessage(client: Client) {
-    const data = await getUniveralSetting('bot_status_channel');
+    const data = await getUniversalSetting('bot_status_channel');
     if (!data.success) return console.log(data.error);
-    const channel = client.channels.cache.get(
-      (data.setting as UniveralSetting).value
-    );
+    const channel = client.channels.cache.get(data.setting.value);
     if (!channel || dev) return;
 
     if (channel.type === ChannelType.GuildText) {
