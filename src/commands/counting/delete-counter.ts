@@ -4,6 +4,7 @@ import { Emojis } from '../../utils/emojis';
 import { MessageContainer } from '../../utils/messageContainer';
 import { deleteCounter } from '../../lib/counters';
 import { sendTyping } from '../../utils/sendTyping';
+import { errorContainer } from '../../utils/errorContainer';
 
 export class DeleteCounterCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -21,11 +22,7 @@ export class DeleteCounterCommand extends Command {
     const counter = await args.pick('string').catch(() => null);
 
     if (!counter) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody('Please provide a counter to delete.');
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Please provide a counter.');
     }
 
     const result = await deleteCounter(counter);

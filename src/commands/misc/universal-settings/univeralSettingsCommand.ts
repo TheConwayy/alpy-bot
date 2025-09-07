@@ -4,6 +4,7 @@ import { Emojis } from '../../../utils/emojis';
 import { MessageContainer } from '../../../utils/messageContainer';
 import { UniversalSettingsHandlers } from './subcommands';
 import { sendTyping } from '../../../utils/sendTyping';
+import { errorContainer } from '../../../utils/errorContainer';
 
 enum Action {
   Add = 'add',
@@ -35,27 +36,15 @@ export class UniversalSettingCommand extends Command {
     const value = await args.rest('string').catch(() => null);
 
     if (!action || (!setting && action !== Action.GetAll)) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody('Please provide an action and a setting.');
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Please provide an action and a setting.');
     }
 
     if (
       (action === Action.Add && !value) ||
       (action === Action.Edit && !value)
     ) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody('Please provide a value.');
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Please provide a value.');
     }
-
-    const errorContainer = new MessageContainer()
-      .setHeading('Error', Emojis.invalid)
-      .setBody('Invalid action.');
 
     switch (action) {
       case Action.Add:
@@ -67,7 +56,7 @@ export class UniversalSettingCommand extends Command {
       case Action.GetAll:
         return UniversalSettingsHandlers.handleGetAll(message);
       default:
-        return message.reply(errorContainer.build());
+        return errorContainer(message, 'Invalid action.');
     }
   }
 }

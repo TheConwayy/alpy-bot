@@ -2,6 +2,7 @@ import { Message } from 'discord.js';
 import { addUniveralSetting } from '../../../../lib/universalSettings';
 import { Emojis } from '../../../../utils/emojis';
 import { MessageContainer } from '../../../../utils/messageContainer';
+import { errorContainer } from '../../../../utils/errorContainer';
 
 export async function handleAdd(
   message: Message,
@@ -10,11 +11,10 @@ export async function handleAdd(
 ) {
   const data = await addUniveralSetting(setting, value);
   if (!data.success) {
-    const errorContainer = new MessageContainer()
-      .setHeading('Error', Emojis.invalid)
-      .setBody(`Failed to add setting.\n**\`Error:\`** ${data.error}`);
-
-    return message.reply(errorContainer.build());
+    return errorContainer(
+      message,
+      `Failed to add setting.\n**\`Error:\`** ${data.error}`
+    );
   }
 
   const messageContainer = new MessageContainer()

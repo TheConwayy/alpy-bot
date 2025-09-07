@@ -6,16 +6,16 @@ import {
 import { Emojis } from '../../../../utils/emojis';
 import { MessageContainer } from '../../../../utils/messageContainer';
 import { noIndent } from '../../../../utils/noIndent';
+import { errorContainer } from '../../../../utils/errorContainer';
 
 export async function handleGetAll(message: Message) {
   const data = await getAlluniversalSettings();
 
   if (!data.success) {
-    const errorContainer = new MessageContainer()
-      .setHeading('Error', Emojis.invalid)
-      .setBody(`Failed to get all settings.\n**\`Error:\`** ${data.error}`);
-
-    return message.reply(errorContainer.build());
+    return errorContainer(
+      message,
+      `Failed to get all settings.\n**\`Error:\`** ${data.error}`
+    );
   }
 
   const messageContainer = new MessageContainer()

@@ -2,15 +2,15 @@ import { Message } from 'discord.js';
 import { deleteUniversalSetting } from '../../../../lib/universalSettings';
 import { Emojis } from '../../../../utils/emojis';
 import { MessageContainer } from '../../../../utils/messageContainer';
+import { errorContainer } from '../../../../utils/errorContainer';
 
 export async function handleRemove(message: Message, setting: string) {
   const data = await deleteUniversalSetting(setting);
   if (!data.success) {
-    const errorContainer = new MessageContainer()
-      .setHeading('Error', Emojis.invalid)
-      .setBody(`Failed to remove setting.\n**\`Error:\`** ${data.error}`);
-
-    return message.reply(errorContainer.build());
+    return errorContainer(
+      message,
+      `Failed to remove setting.\n**\`Error:\`** ${data.error}`
+    );
   }
 
   const messageContainer = new MessageContainer()

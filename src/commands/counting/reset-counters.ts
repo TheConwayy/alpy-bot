@@ -10,6 +10,7 @@ import {
 } from './init-counters';
 import { getSetting } from '../../lib/settings';
 import { sendTyping } from '../../utils/sendTyping';
+import { errorContainer } from '../../utils/errorContainer';
 
 export class ResetCountersCommand extends Command {
   public constructor(context: Command.LoaderContext) {
@@ -26,21 +27,16 @@ export class ResetCountersCommand extends Command {
     const result = await resetAllCounters();
 
     if (!result.success) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody(`Failed to reset counters.\n**\`Error:\`** ${result.error}`);
-
-      return message.reply(errorContainer.build());
+      return errorContainer(
+        message,
+        `Failed to reset counters.\n**\`Error:\`** ${result.error}`
+      );
     }
 
     const counters = await getAllCounters();
 
     if (!counters.success || !counters.counter) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody('Error getting counters');
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Error getting counters');
     }
 
     const counterContainer = new MessageContainer()
@@ -51,30 +47,16 @@ export class ResetCountersCommand extends Command {
 
     const countingChannel = await getSetting('counting_channel');
     if (!countingChannel) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody(
-          'Please set a counting channel first.\n`!create-setting counting_channel <channel>`'
-        );
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Please set a counting channel first');
     }
 
     const channel = message.guild?.channels.cache.get(countingChannel.value);
     if (!channel) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody('Counting channel could not be found');
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Counting channel could not be found');
     }
 
     if (channel.type !== ChannelType.GuildText) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody('Counting channel is not a text channel');
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Counting channel is not a text channel');
     }
 
     const messagesInChannel = await channel.messages.fetch();

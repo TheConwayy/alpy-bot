@@ -6,6 +6,7 @@ import { MessageContainer } from '../../utils/messageContainer';
 import { getAllCounters } from '../../lib/counters';
 import { noIndent } from '../../utils/noIndent';
 import { sendTyping } from '../../utils/sendTyping';
+import { errorContainer } from '../../utils/errorContainer';
 
 /**
  * Formats a given string to a space-separated string with title case.
@@ -75,30 +76,16 @@ export class InitCountersCommand extends Command {
 
     const channelResult = await getSetting('counting_channel');
     if (!channelResult) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody(
-          'Please set a counting channel first.\n`!create-setting counting_channel <channel>`'
-        );
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Counting channel is not set');
     }
 
     const channel = message.guild?.channels.cache.get(channelResult.value);
     if (!channel) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody('Counting channel could not be found');
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Counting channel is not found');
     }
 
     if (channel.type !== ChannelType.GuildText) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody('Counting channel is not a text channel');
-
-      return message.reply(errorContainer.build());
+      return errorContainer(message, 'Counting channel is not a text channel');
     }
 
     const messagesInChannel = await channel.messages.fetch();
@@ -110,13 +97,10 @@ export class InitCountersCommand extends Command {
     const counters = await getAllCounters();
 
     if (!counters.success || !counters.counter) {
-      const errorContainer = new MessageContainer()
-        .setHeading('Error', Emojis.invalid)
-        .setBody(
-          `Failed to initialize counters.\n**\`Error:\`** ${counters.error}`
-        );
-
-      return message.reply(errorContainer.build());
+      return errorContainer(
+        message,
+        'Failed to initialize counters\n**Error:** ' + counters.error
+      );
     }
 
     const counterContainer = new MessageContainer()
