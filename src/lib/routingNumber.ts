@@ -1,11 +1,12 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient'; // ✅ reuse shared client
 import { GoogleAuth } from 'google-auth-library';
 
 // Constants
 const baseUrl = 'https://fed-445739603043.us-east1.run.app';
+const CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Type definitions
-interface ACHParticipant {
+export interface ACHParticipant {
   routingNumber: string;
   customerName: string;
   achLocation: {
@@ -15,11 +16,11 @@ interface ACHParticipant {
   };
 }
 
-interface FedACHResponse {
+export interface FedACHResponse {
   achParticipants: ACHParticipant[];
 }
 
-interface RoutingNumberResult {
+export interface RoutingNumberResult {
   valid: boolean;
   name?: string;
   city?: string;
@@ -28,7 +29,7 @@ interface RoutingNumberResult {
   error?: string;
 }
 
-interface CachedRoutingNumber {
+export interface CachedRoutingNumber {
   routing_number: string;
   institution_name: string | null;
   city: string | null;
@@ -38,22 +39,18 @@ interface CachedRoutingNumber {
   last_checked: string;
 }
 
-// Init Supabase
-// Initialize Supabase with service role key (has admin privileges)
-const supabaseUrl = process.env.SUPABASE_URL as string;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY as string; // Add this to your .env
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
-// Fixed typo in variable name (supbase → supabase)
+// 🔹 Helper: map cached DB row to result
+function mapCachedToResult(cached: CachedRoutingNumber): RoutingNumberResult {
+  return {
+    valid: cached.is_valid,
+    name: cached.institution_name || undefined,
+    city: cached.city || undefined,
+    state: cached.state || undefined,
+    zip: cached.zip_code || undefined,
+  };
+}
 
-// Cache (30 days in ms)
-const CACHE_DURATION = 30 * 24 * 60 * 60 * 1000;
-
-// Get ID token for Google Cloud
+// 🔹 Get ID token for Google Cloud
 async function getIdToken(): Promise<string> {
   const auth = new GoogleAuth({});
   const client = await auth.getIdTokenClient(baseUrl);
@@ -61,65 +58,58 @@ async function getIdToken(): Promise<string> {
   return headers.Authorization.split(' ')[1];
 }
 
-// Check for routing number
+// 🔹 Main function
 export async function checkRoutingNumber(
   routingNumber: string
 ): Promise<RoutingNumberResult> {
-  // Validate format
+  // ✅ Validate format
   if (!/^\d{9}$/.test(routingNumber)) {
     return { valid: false, error: 'Invalid format' };
   }
 
-  // Check cache
-  const { data: cachedData } = await supabase
+  // ✅ Check cache
+  const { data: cachedData, error: cacheError } = await supabase
     .from('routing_numbers')
     .select('*')
     .eq('routing_number', routingNumber)
     .single();
 
-  const typedCachedData = cachedData as CachedRoutingNumber | null;
-
-  if (
-    typedCachedData &&
-    new Date().getTime() - new Date(typedCachedData.last_checked).getTime() <
-      CACHE_DURATION
-  ) {
-    return {
-      valid: typedCachedData.is_valid,
-      name: typedCachedData.institution_name || undefined,
-      city: typedCachedData.city || undefined,
-      state: typedCachedData.state || undefined,
-      zip: typedCachedData.zip_code || undefined,
-    };
+  if (cacheError && cacheError.code !== 'PGRST116') {
+    // PGRST116 = no rows found
+    return { valid: false, error: cacheError.message };
   }
 
+  if (cachedData) {
+    const cached = cachedData as CachedRoutingNumber;
+    const isFresh =
+      Date.now() - new Date(cached.last_checked).getTime() < CACHE_DURATION;
+
+    if (isFresh) {
+      return mapCachedToResult(cached);
+    }
+  }
+
+  // ✅ Fetch from FedACH API
   try {
-    // Fetch from API - FIXED THE PARAMETER NAME
     const token = await getIdToken();
     const response = await fetch(
       `${baseUrl}/fed/ach/search?routingNumber=${routingNumber}`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
-    // Add error handling for non-200 responses
     if (!response.ok) {
-      console.error(`API error: ${response.status} ${response.statusText}`);
-      return { valid: false, error: `API error: ${response.status}` };
+      return {
+        valid: false,
+        error: `API error: ${response.status} ${response.statusText}`,
+      };
     }
 
-    const responseData = await response.json();
+    const data = (await response.json()) as FedACHResponse;
+    const isValid = data.achParticipants?.length > 0;
 
-    const data = responseData as FedACHResponse;
-    const isValid =
-      data && data.achParticipants && data.achParticipants.length > 0;
-
-    const result: RoutingNumberResult = {
-      valid: isValid,
-    };
+    const result: RoutingNumberResult = { valid: isValid };
 
     if (isValid) {
       const participant = data.achParticipants[0];
@@ -129,28 +119,21 @@ export async function checkRoutingNumber(
       result.zip = participant.achLocation.postalCode;
     }
 
-    // Update cache
-    // Update cache with error handling
-    try {
-      const { error: upsertError } = await supabase
-        .from('routing_numbers')
-        .upsert({
-          routing_number: routingNumber,
-          institution_name: result.name || null,
-          city: result.city || null,
-          state: result.state || null,
-          zip_code: result.zip || null,
-          is_valid: isValid,
-          last_checked: new Date().toISOString(),
-        });
+    // ✅ Update cache
+    const { error: upsertError } = await supabase
+      .from('routing_numbers')
+      .upsert({
+        routing_number: routingNumber,
+        institution_name: result.name || null,
+        city: result.city || null,
+        state: result.state || null,
+        zip_code: result.zip || null,
+        is_valid: isValid,
+        last_checked: new Date().toISOString(),
+      });
 
-      if (upsertError) {
-        console.error('Supabase upsert error:', upsertError);
-      } else {
-        console.log('Data successfully cached in Supabase');
-      }
-    } catch (dbError) {
-      console.error('Database operation failed:', dbError);
+    if (upsertError) {
+      console.error('Supabase upsert error:', upsertError);
     }
 
     return result;
