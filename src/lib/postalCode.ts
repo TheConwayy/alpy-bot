@@ -1,10 +1,11 @@
-import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient';
 
 // Constants
 const url = `http://api.geonames.org/postalCodeSearchJSON?maxRows=1&countryCode=US&username=${process.env.GEONAMES_USERNAME}`;
+const CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Type definitions
-interface PostalCodeEntry {
+export interface PostalCodeEntry {
   adminCode2: string;
   adminCode1: string;
   adminName2: string;
@@ -17,11 +18,11 @@ interface PostalCodeEntry {
   lat: number;
 }
 
-interface GeoNamesPostalResponse {
+export interface GeoNamesPostalResponse {
   postalCodes: PostalCodeEntry[];
 }
 
-interface CachedPostalCode {
+export interface CachedPostalCode {
   postal_code: string;
   city_name: string;
   state_name: string;
@@ -31,7 +32,7 @@ interface CachedPostalCode {
   last_checked: string;
 }
 
-interface PostalCodeResult {
+export interface PostalCodeResult {
   valid: boolean;
   city?: string;
   state?: string;
@@ -41,60 +42,64 @@ interface PostalCodeResult {
   error?: string;
 }
 
-// Init Supabase
-// Initialize Supabase with service role key (has admin privileges)
-const supabaseUrl = process.env.SUPABASE_URL as string;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY as string; // Add this to your .env
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// 🔹 Helper: map cached DB row to result
+function mapCachedToResult(cached: CachedPostalCode): PostalCodeResult {
+  return {
+    valid: cached.is_valid,
+    city: cached.city_name || undefined,
+    state: cached.state_name || undefined,
+    stateAbb: cached.state_abb || undefined,
+    county: cached.county_name || undefined,
+    postalCode: cached.postal_code || undefined,
+  };
+}
 
-const CACHE_DURATION = 30 * 24 * 60 * 60 * 1000;
-
+// 🔹 Main function
 export async function getPostalCodeData(
   postalCode: string
 ): Promise<PostalCodeResult> {
-  // Check formatting
-  if (!/^\d{5}$/.test(postalCode))
+  // ✅ Validate format
+  if (!/^\d{5}$/.test(postalCode)) {
     return { valid: false, error: 'Invalid format' };
+  }
 
-  // Check cache
-  const { data: cachedData } = await supabase
+  // ✅ Check cache
+  const { data: cachedData, error: cacheError } = await supabase
     .from('postal_codes')
     .select('*')
     .eq('postal_code', postalCode)
     .single();
 
-  const typedCachedData = cachedData as CachedPostalCode | null;
-
-  if (
-    typedCachedData &&
-    new Date().getTime() - new Date(typedCachedData.last_checked).getTime() <
-      CACHE_DURATION
-  ) {
-    return {
-      valid: typedCachedData.is_valid,
-      city: typedCachedData.city_name || undefined,
-      state: typedCachedData.state_name || undefined,
-      stateAbb: typedCachedData.state_abb || undefined,
-      county: typedCachedData.county_name || undefined,
-      postalCode: typedCachedData.postal_code || undefined,
-    };
+  if (cacheError && cacheError.code !== 'PGRST116') {
+    // PGRST116 = no rows found
+    return { valid: false, error: cacheError.message };
   }
 
+  if (cachedData) {
+    const cached = cachedData as CachedPostalCode;
+    const isFresh =
+      Date.now() - new Date(cached.last_checked).getTime() < CACHE_DURATION;
+
+    if (isFresh) {
+      return mapCachedToResult(cached);
+    }
+  }
+
+  // ✅ Fetch from GeoNames API
   try {
-    // Fetch from API
     const res = await fetch(`${url}&postalcode=${postalCode}`);
     if (!res.ok) {
-      throw new Error(res.statusText);
+      throw new Error(`GeoNames API error: ${res.statusText}`);
     }
+
     const data = (await res.json()) as GeoNamesPostalResponse;
     const entry = data.postalCodes[0];
 
-    // Update cache
+    if (!entry) {
+      return { valid: false, error: 'Postal code not found' };
+    }
+
+    // ✅ Update cache
     await supabase.from('postal_codes').upsert({
       postal_code: postalCode,
       city_name: entry.placeName,
