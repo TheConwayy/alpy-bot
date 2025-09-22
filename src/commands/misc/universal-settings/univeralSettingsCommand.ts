@@ -1,7 +1,7 @@
 import { Args, Command } from '@sapphire/framework';
 import { Message } from 'discord.js';
 import { UniversalSettingsHandlers } from './subcommands';
-import { sendTyping } from '../../../utils/sendTyping';
+import { deferReply } from '../../../utils/deferReply';
 import { errorContainer } from '../../../utils/errorContainer';
 
 enum Action {
@@ -9,6 +9,7 @@ enum Action {
   Remove = 'remove',
   Edit = 'edit',
   GetAll = 'get-all',
+  Help = 'help',
 }
 
 export class UniversalSettingCommand extends Command {
@@ -27,21 +28,26 @@ export class UniversalSettingCommand extends Command {
       return;
     }
 
-    await sendTyping(message);
+    await deferReply(message);
 
     const action = await args.pick('string').catch(() => null);
     const setting = await args.pick('string').catch(() => null);
     const value = await args.rest('string').catch(() => null);
 
-    if (!action || (!setting && action !== Action.GetAll)) {
-      return errorContainer(message, 'Please provide an action and a setting.');
-    }
+    if (action !== Action.Help) {
+      if (!action || (!setting && action !== Action.GetAll)) {
+        return errorContainer(
+          message,
+          'Please provide an action and a setting.'
+        );
+      }
 
-    if (
-      (action === Action.Add && !value) ||
-      (action === Action.Edit && !value)
-    ) {
-      return errorContainer(message, 'Please provide a value.');
+      if (
+        (action === Action.Add && !value) ||
+        (action === Action.Edit && !value)
+      ) {
+        return errorContainer(message, 'Please provide a value.');
+      }
     }
 
     switch (action) {
@@ -53,6 +59,8 @@ export class UniversalSettingCommand extends Command {
         return UniversalSettingsHandlers.handleEdit(message, setting!, value!);
       case Action.GetAll:
         return UniversalSettingsHandlers.handleGetAll(message);
+      case Action.Help:
+        return UniversalSettingsHandlers.handleHelp(message);
       default:
         return errorContainer(message, 'Invalid action.');
     }

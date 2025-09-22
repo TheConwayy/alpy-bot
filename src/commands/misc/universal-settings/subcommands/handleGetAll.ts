@@ -26,5 +26,5 @@ export async function handleGetAll(message: Message) {
         .join('\n')
     );
 
-  return message.reply(messageContainer.build());
+  return message.reply(messageContainer.build('message'));
 }

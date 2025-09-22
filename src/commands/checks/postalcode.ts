@@ -1,10 +1,10 @@
-import { Args, Command } from '@sapphire/framework';
-import { ButtonStyle, Message } from 'discord.js';
+import { ApplicationCommandRegistry, Command } from '@sapphire/framework';
+import { ButtonStyle } from 'discord.js';
 import { Emojis } from '../../utils/emojis';
 import { MessageContainer } from '../../utils/messageContainer';
 import { noIndent } from '../../utils/noIndent';
 import { getPostalCodeData } from '../../lib/postalCode';
-import { sendTyping } from '../../utils/sendTyping';
+import { deferReply } from '../../utils/deferReply';
 
 export class PostalCodeCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -12,16 +12,33 @@ export class PostalCodeCommand extends Command {
       ...options,
       name: 'postalcode',
       description: 'Check information about a postal code',
-      aliases: ['postal', 'pc', 'zipcode', 'zip', 'z'],
       cooldownDelay: 60_000,
       cooldownLimit: 3,
     });
   }
 
-  public override async messageRun(message: Message, args: Args) {
-    const postalCode = await args.pick('string');
+  public override registerApplicationCommands(
+    registry: ApplicationCommandRegistry
+  ) {
+    registry.registerChatInputCommand((builder) =>
+      builder
+        .setName(this.name)
+        .setDescription(this.description)
+        .addStringOption((option) =>
+          option
+            .setName('postalcode')
+            .setDescription('The postal code to check')
+            .setRequired(true)
+        )
+    );
+  }
 
-    await sendTyping(message);
+  public override async chatInputRun(
+    interaction: Command.ChatInputCommandInteraction
+  ) {
+    const postalCode = interaction.options.getString('postalcode', true);
+
+    await deferReply(interaction);
 
     const result = await getPostalCodeData(postalCode);
     const dataFound = result.valid;
@@ -47,17 +64,12 @@ export class PostalCodeCommand extends Command {
 
     if (dataFound) {
       container.addButton({
-        customId: 'delete-response',
-        label: 'Delete Response',
-        style: ButtonStyle.Danger,
-      });
-      container.addButton({
         label: 'Check Google Maps',
         style: ButtonStyle.Link,
         url: `https://www.google.com/maps/search/${entry.postalCode}`,
       });
     }
 
-    return message.reply(container.build());
+    return await interaction.editReply(container.build('edit'));
   }
 }

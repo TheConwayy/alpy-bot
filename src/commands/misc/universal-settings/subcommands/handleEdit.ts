@@ -23,5 +23,5 @@ export async function handleEdit(
       `Successfully edited setting \`${setting}\` with value \`${value}\``
     );
 
-  return message.reply(messageContainer.build());
+  return message.reply(messageContainer.build('message'));
 }
