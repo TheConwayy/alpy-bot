@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { CommandInteraction, Message } from 'discord.js';
 import { Emojis } from './emojis';
 import { MessageContainer } from './messageContainer';
 
@@ -8,10 +8,15 @@ import { MessageContainer } from './messageContainer';
  * @param error The error message to send.
  * @returns The sent message.
  */
-export function errorContainer(message: Message, error: string) {
+export function errorContainer(
+  interactionOrMessage: CommandInteraction | Message,
+  error: string
+) {
   const errorContainer = new MessageContainer()
     .setHeading('Error', Emojis.invalid)
     .setBody(`**\`Error:\`** ${error}`);
 
-  return message.reply(errorContainer.build());
+  interactionOrMessage instanceof CommandInteraction
+    ? interactionOrMessage.reply(errorContainer.build('reply'))
+    : interactionOrMessage.reply(errorContainer.build('message'));
 }

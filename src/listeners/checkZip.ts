@@ -46,18 +46,13 @@ export class CheckZipListener extends Listener {
 
       if (dataFound) {
         container.addButton({
-          customId: 'delete-response',
-          label: 'Delete Response',
-          style: ButtonStyle.Danger,
-        });
-        container.addButton({
           label: 'Check Google Maps',
           style: ButtonStyle.Link,
           url: `https://www.google.com/maps/search/${entry.postalCode}`,
         });
       }
 
-      return interaction.message.reply(container.build());
+      return interaction.reply(container.build('reply'));
     } else return;
   }
 }

@@ -4,6 +4,8 @@ import {
   APIMessageComponentEmoji,
   ButtonStyle,
   ContainerBuilder,
+  InteractionEditReplyOptions,
+  InteractionReplyOptions,
   MessageFlags,
   MessageReplyOptions,
   SeparatorBuilder,
@@ -134,10 +136,30 @@ export class MessageContainer {
     return this;
   }
 
-  public build(): MessageReplyOptions {
-    return {
-      flags: MessageFlags.IsComponentsV2,
+  public build(type: 'reply'): InteractionReplyOptions;
+  public build(type: 'message'): MessageReplyOptions;
+  public build(type: 'edit'): InteractionEditReplyOptions;
+  public build(
+    type: 'reply' | 'message' | 'edit'
+  ):
+    | InteractionReplyOptions
+    | MessageReplyOptions
+    | InteractionEditReplyOptions {
+    const base = {
       components: [this.container],
+      flags: [MessageFlags.Ephemeral, MessageFlags.IsComponentsV2],
     };
+
+    switch (type) {
+      case 'reply':
+        return base as InteractionReplyOptions;
+      case 'message':
+        return base as MessageReplyOptions;
+      case 'edit':
+        return {
+          flags: [MessageFlags.IsComponentsV2],
+          components: [this.container],
+        } as InteractionEditReplyOptions;
+    }
   }
 }

@@ -17,5 +17,5 @@ export async function handleRemove(message: Message, setting: string) {
     .setHeading('Success', Emojis.valid)
     .setBody(`Successfully removed setting \`${setting}\``);
 
-  return message.reply(messageContainer.build());
+  return message.reply(messageContainer.build('message'));
 }

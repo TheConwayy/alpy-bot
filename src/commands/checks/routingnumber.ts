@@ -1,10 +1,10 @@
-import { Args, Command } from '@sapphire/framework';
-import { Message, ButtonStyle } from 'discord.js';
+import { Command } from '@sapphire/framework';
+import { ButtonStyle } from 'discord.js';
 import { checkRoutingNumber } from '../../lib/routingNumber';
 import { noIndent } from '../../utils/noIndent';
 import { MessageContainer } from '../../utils/messageContainer';
 import { Emojis } from '../../utils/emojis';
-import { sendTyping } from '../../utils/sendTyping';
+import { deferReply } from '../../utils/deferReply';
 
 export class RoutingCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -18,13 +18,26 @@ export class RoutingCommand extends Command {
     });
   }
 
-  public override async messageRun(
-    message: Message,
-    args: Args
-  ): Promise<Message> {
-    const routingNumber = await args.pick('string');
+  public override registerApplicationCommands(registry: Command.Registry) {
+    registry.registerChatInputCommand((builder) =>
+      builder
+        .setName(this.name)
+        .setDescription(this.description)
+        .addStringOption((option) =>
+          option
+            .setName('routingnumber')
+            .setDescription('The routing number to check')
+            .setRequired(true)
+        )
+    );
+  }
 
-    await sendTyping(message);
+  public override async chatInputRun(
+    interaction: Command.ChatInputCommandInteraction
+  ) {
+    const routingNumber = interaction.options.getString('routingnumber', true);
+
+    await deferReply(interaction);
 
     const result = await checkRoutingNumber(routingNumber);
     const valid = result.valid;
@@ -48,17 +61,12 @@ export class RoutingCommand extends Command {
 
     if (valid) {
       container.addButton({
-        customId: `delete-response`,
-        label: 'Delete Response',
-        style: ButtonStyle.Danger,
-      });
-      container.addButton({
         customId: `checkZip-${result.zip}`,
         label: 'Check ZIP',
         style: ButtonStyle.Primary,
       });
     }
 
-    return message.reply(container.build());
+    return interaction.editReply(container.build('edit'));
   }
 }

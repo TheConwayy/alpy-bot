@@ -42,5 +42,5 @@ export async function handleHelp(message: Message) {
     .setHeading('Help', Emojis.notepad)
     .setBody(commands.map((command) => formatMessage(command)).join('\n\n'));
 
-  return message.reply(messageContainer.build());
+  return message.reply(messageContainer.build('message'));
 }

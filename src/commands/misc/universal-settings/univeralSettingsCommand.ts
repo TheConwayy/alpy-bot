@@ -1,7 +1,7 @@
 import { Args, Command } from '@sapphire/framework';
 import { Message } from 'discord.js';
 import { UniversalSettingsHandlers } from './subcommands';
-import { sendTyping } from '../../../utils/sendTyping';
+import { deferReply } from '../../../utils/deferReply';
 import { errorContainer } from '../../../utils/errorContainer';
 
 enum Action {
@@ -28,7 +28,7 @@ export class UniversalSettingCommand extends Command {
       return;
     }
 
-    await sendTyping(message);
+    await deferReply(message);
 
     const action = await args.pick('string').catch(() => null);
     const setting = await args.pick('string').catch(() => null);

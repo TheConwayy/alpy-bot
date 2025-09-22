@@ -16,6 +16,6 @@ export class UserEvent extends Listener<typeof Events.MessageCommandDenied> {
       .setHeading('Error', Emojis.invalid)
       .setBody(`## Error Details:\n${content}`);
 
-    return message.reply(container.build());
+    return message.reply(container.build('message'));
   }
 }
