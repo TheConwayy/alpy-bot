@@ -21,7 +21,7 @@ export async function activateSubcommand(
 
   const { error: guildUpdateError } = await supabase
     .from('guilds')
-    .update({ active: true })
+    .update({ active: true, last_edited_by: interaction.user.id })
     .eq('id', data.id);
 
   if (guildUpdateError) {
