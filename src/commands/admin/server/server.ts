@@ -1,9 +1,6 @@
 import { Subcommand } from '@sapphire/plugin-subcommands';
-import { deferReply } from '../../utils/deferReply';
-import { errorContainer } from '../../utils/errorContainer';
-import { supabase } from '../../lib/supabaseClient';
-import { Emojis } from '../../utils/emojis';
-import { MessageContainer } from '../../utils/messageContainer';
+import { deferReply } from '../../../utils/deferReply';
+import { ServerCommandSubcommands } from './subcommands';
 
 export class ServerCommand extends Subcommand {
   public constructor(
@@ -16,7 +13,6 @@ export class ServerCommand extends Subcommand {
       subcommands: [
         {
           name: 'activate',
-          chatInputRun: 'serverActivate',
           requiredUserPermissions: ['Administrator'],
         },
       ],
@@ -42,36 +38,18 @@ export class ServerCommand extends Subcommand {
     );
   }
 
-  public async serverActivate(
+  public override async chatInputRun(
     interaction: Subcommand.ChatInputCommandInteraction
   ) {
-    const password = interaction.options.getString('password', true);
-
     await deferReply(interaction);
 
-    const { data, error } = await supabase
-      .from('guilds')
-      .select('id')
-      .eq('activation_password', password)
-      .single();
-
-    if (error || !data) {
-      return errorContainer(interaction, 'Invalid password');
+    switch (interaction.options.getSubcommand()) {
+      case 'activate':
+        await ServerCommandSubcommands.activateSubcommand(interaction);
+        return;
+      default:
+        await interaction.editReply('Unknown subcommand');
+        return;
     }
-
-    const { error: guildUpdateError } = await supabase
-      .from('guilds')
-      .update({ active: true })
-      .eq('id', data.id);
-
-    if (guildUpdateError) {
-      return errorContainer(interaction, guildUpdateError.message);
-    }
-
-    const container = new MessageContainer()
-      .setHeading('Success', Emojis.valid)
-      .setBody('Guild activated');
-
-    return interaction.editReply(container.build('edit'));
   }
 }
