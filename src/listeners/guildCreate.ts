@@ -40,11 +40,8 @@ export class GuildAddListener extends Listener {
     });
 
     const { error: botAdminUpsertError } = await supabase
-      .from('bot_admins')
-      .upsert({
-        guild_id: guild.id,
-        user_id: guild.ownerId,
-      });
+      .from('users')
+      .upsert({ user_id: guild.ownerId, guild_id: guild.id, is_admin: true });
 
     if (guildUpsertError || botAdminUpsertError)
       console.error(guildUpsertError, botAdminUpsertError);

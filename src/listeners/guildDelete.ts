@@ -14,15 +14,16 @@ export class GuildRemoveListener extends Listener {
   }
 
   public async run(guild: Guild) {
+    const { error: botAdminDeleteError, count } = await supabase
+      .from('users')
+      .delete({ count: 'exact' })
+      .eq('guild_id', guild.id)
+      .eq('is_admin', true);
+
     const { error: guildDeleteError } = await supabase
       .from('guilds')
       .delete()
       .eq('id', guild.id);
-
-    const { error: botAdminDeleteError, count } = await supabase
-      .from('bot_admins')
-      .delete({ count: 'exact' })
-      .eq('guild_id', guild.id);
 
     if (guildDeleteError || botAdminDeleteError)
       console.error(guildDeleteError, botAdminDeleteError);
