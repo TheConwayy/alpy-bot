@@ -12,6 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      OWNER_LC: ''
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
