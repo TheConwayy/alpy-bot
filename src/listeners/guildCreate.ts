@@ -46,7 +46,7 @@ export class GuildAddListener extends Listener {
     if (guildUpsertError || botAdminUpsertError)
       console.error(guildUpsertError, botAdminUpsertError);
 
-    console.log(
+    this.container.logger.info(
       `Joined guild: ${guild.name} (${guild.id}) - ${guild.ownerId} added as admin`
     );
   }
