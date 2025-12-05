@@ -28,7 +28,7 @@ export class GuildRemoveListener extends Listener {
     if (guildDeleteError || botAdminDeleteError)
       console.error(guildDeleteError, botAdminDeleteError);
 
-    console.log(
+    this.container.logger.info(
       `Left guild: ${guild.name} (${guild.id}) - ${count} ${count === 1 ? 'admin' : 'admins'} removed`
     );
   }
